@@ -1,65 +1,43 @@
 #include "who_logged.h"
 
-void WhoLoggedAnnounce::OnPlayerLogin(Player* player)
+std::string GetPlayerClassName(uint32 classId)
 {
-    if (!sConfigMgr->GetOption<bool>("PlayerLoginAnnounce", true))
+    switch (classId)
+    {
+        case CLASS_WARLOCK: return "Warlock";
+        case CLASS_WARRIOR: return "Warrior";
+        case CLASS_MAGE: return "Mage";
+        case CLASS_SHAMAN: return "Shaman";
+        case CLASS_DEATH_KNIGHT: return "Death Knight";
+        case CLASS_DRUID: return "Druid";
+        case CLASS_HUNTER: return "Hunter";
+        case CLASS_PALADIN: return "Paladin";
+        case CLASS_ROGUE: return "Rogue";
+        case CLASS_PRIEST: return "Priest";
+        default: return "Unknown Class";
+    }
+}
+
+void LogConnectMessage(std::string action, std::string configKey, Player* player) {
+    if (!sConfigMgr->GetOption<bool>(configKey, true))
         return;
 
     std::string playerIP = player->GetSession()->GetRemoteAddress();
     std::string playerName = player->GetName();
     uint32 playerAccountID = player->GetSession()->GetAccountId();
     uint32 playerLevel = player->GetLevel();
-    std::string playerClass;
-    std::ostringstream message;
+    std::string playerClass = GetPlayerClassName(player->getClass());
 
-    switch (player->getClass())
-    {
-        case CLASS_WARLOCK:
-            playerClass = "Warlock";
-            break;
-        case CLASS_WARRIOR:
-            playerClass = "Warrior";
-            break;
-        case CLASS_MAGE:
-            playerClass = "Mage";
-            break;
-        case CLASS_SHAMAN:
-            playerClass = "Shaman";
-            break;
-        case CLASS_DEATH_KNIGHT:
-            playerClass = "Death Knight";
-            break;
-        case CLASS_DRUID:
-            playerClass = "Druid";
-            break;
-        case CLASS_HUNTER:
-            playerClass = "Hunter";
-            break;
-        case CLASS_PALADIN:
-            playerClass = "Paladin";
-            break;
-        case CLASS_ROGUE:
-            playerClass = "Rogue";
-            break;
-        case CLASS_PRIEST:
-            playerClass = "Priest";
-            break;
-    }
+    LOG_INFO("module", "Player '{}' has {} : Level '{}' : Class '{}' : IP '{}' : AccountID '{}'", playerName.c_str(), action, std::to_string(playerLevel), playerClass.c_str(), playerIP.c_str(), playerAccountID);
 
-    LOG_INFO("module", "Player '{}' has logged in : Level '{}' : Class '{}' : IP '{}' : AccountID '{}'", playerName.c_str(), std::to_string(playerLevel), playerClass.c_str(), playerIP.c_str(), playerAccountID);
+}
+
+void WhoLoggedAnnounce::OnPlayerLogin(Player* player)
+{
+    LogConnectMessage("logged in", "PlayerLoginAnnounce", player);
 }
 
 void WhoLoggedAnnounce::OnPlayerLogout(Player* player)
 {
-    if (!sConfigMgr->GetOption<bool>("PlayerLogoutAnnounce", true))
-        return;
-        
-    if (WorldSession* session = player->GetSession())
-    {
-        std::string playerIP = session->GetRemoteAddress();
-        uint32 playerAccountID = session->GetAccountId();
-        std::string playerName = player->GetName();
-
-        LOG_INFO("module", "Player '{}' has logged out : IP '{}' : AccountID '{}'", playerName.c_str(), playerIP.c_str(), playerAccountID);
-    }
+    LogConnectMessage("logged out", "PlayerLogoutAnnounce", player);
 }

@@ -11,7 +11,7 @@ class WhoLoggedAnnounce : public PlayerScript
 public:
     WhoLoggedAnnounce() : PlayerScript("WhoLoggedAnnounce", {
         PLAYERHOOK_ON_LOGIN,
-        PLAYERHOOK_ON_LOGOUT
+        PLAYERHOOK_ON_LOGOUT,
     }) {}
 
     void OnPlayerLogin(Player* player) override;
